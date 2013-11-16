@@ -15,13 +15,13 @@ public class MessageHandler extends MessageRequest {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(MessageHandler.class);
 
-    public MessageResponse enterRoom(String args){
+    public MessageRequest enterRoom(String args){
         //LOGGER.info("in server side MessageHandler.enterRoom "+args);
         String roomInfo =
         "{\"roomId\": \"r1\",\"seatNo\":3,\"players\":[{\"nickName\":\"u1\",\"seatNo\":1},{\"nickName\":\"u2\",\"seatNo\":2}]}\n";
-        MessageResponse messageResponse = new MessageResponse();
-        messageResponse.setClientMethod("hello");
-        messageResponse.setClientMethodParameters(roomInfo);
+        MessageRequest messageResponse = new MessageRequest();
+        messageResponse.setServerMethod("aaa");
+        messageResponse.setServerMethodParameters(roomInfo);
         return messageResponse;
     }
 }

@@ -80,6 +80,6 @@ public class MinaConnector {
         messageRequest.setServerMethod("messageHandler.enterRoom");
         messageRequest.setServerMethodParameters("abc");
         minaConnector.sendCommand(messageRequest);
-        minaConnector.disconnect();
+        //minaConnector.disconnect();
     }
 }

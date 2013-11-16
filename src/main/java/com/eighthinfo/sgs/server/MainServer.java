@@ -17,6 +17,8 @@ import org.apache.mina.statemachine.context.IoSessionStateContextLookup;
 import org.apache.mina.statemachine.context.StateContext;
 import org.apache.mina.statemachine.context.StateContextFactory;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -31,6 +33,8 @@ import java.net.InetSocketAddress;
  * To change this template use File | Settings | File Templates.
  */
 public class MainServer {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(MainServer.class);
 
     private NioSocketAcceptor acceptor;
 
@@ -62,10 +66,20 @@ public class MainServer {
             String clazzName = handlerName.substring(0,handlerName.indexOf("."));
             String methodName = handlerName.substring(handlerName.indexOf(".") + 1,handlerName.length());
 
-            MessageResponse result = (MessageResponse)ClassUtils.invokeMethod(ac.getBean(clazzName),
+            MessageRequest result = (MessageRequest)ClassUtils.invokeMethod(ac.getBean(clazzName),
                     methodName,new Class<?>[]{String.class},new String[]{messageRequest.getServerMethodParameters()});
 
             super.messageReceived(session, message);
+            LOGGER.info("server is send message");
+            session.write(result);
+        }
+
+        @Override
+        public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
+            super.exceptionCaught(session, cause);
+            LOGGER.warn("Unexpected error.", cause.toString());
+//            session.write("codec error");
+            //session.close(true);
         }
     }
     private static IoHandler createIoHandlerUseStateMachine() {
