@@ -14,4 +14,6 @@ public interface Constants {
     int MAX_MESSAGE_LENGTH = 4192;
 
     char MESSAGE_NAME_PAD_CHAR = ' ';
+
+
 }

@@ -1,7 +1,7 @@
 package com.eighthinfo.sgs.codec;
 
 import com.eighthinfo.sgs.Constants;
-import com.eighthinfo.sgs.message.MessageRequest;
+import com.eighthinfo.sgs.message.CommonMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -39,9 +39,9 @@ public class MessageDecoder extends CumulativeProtocolDecoder {
                     length - operateNameLength);
             String messageBody = new String(messageBodyBytes);
             LOGGER.info("receive message body "+messageBody);
-            MessageRequest messageRequest = new MessageRequest();
-            messageRequest.setServerMethod(messageName);
-            messageRequest.setServerMethodParameters(messageBody);
+            CommonMessage messageRequest = new CommonMessage();
+            messageRequest.setCallMethod(messageName);
+            messageRequest.setCallMethodParameters(messageBody);
             protocolDecoderOutput.write(messageRequest);
             return true;
         }else{

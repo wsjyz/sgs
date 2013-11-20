@@ -1,9 +1,13 @@
 package com.eighthinfo.sgs.server;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.eighthinfo.sgs.codec.SgsCodecFactory;
-import com.eighthinfo.sgs.message.MessageRequest;
-import com.eighthinfo.sgs.message.MessageResponse;
+import com.eighthinfo.sgs.message.BroadcastHandler;
+import com.eighthinfo.sgs.message.CommonMessage;
 import com.eighthinfo.sgs.utils.ClassUtils;
+import com.eighthinfo.sgs.utils.Invokers;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
@@ -40,7 +44,9 @@ public class MainServer {
 
     private int port;
 
-    ApplicationContext ac = new ClassPathXmlApplicationContext("spring-config.xml");
+    static ApplicationContext ds = new ClassPathXmlApplicationContext("datasource.xml");
+    static ApplicationContext ac = new ClassPathXmlApplicationContext("spring-config.xml");
+
 
     public MainServer(int port) {
         this.port = port;
@@ -58,20 +64,37 @@ public class MainServer {
         MainServer mainServer = new MainServer(9110);
         mainServer.start();
     }
-    private class CommonIoHandler extends IoHandlerAdapter {
+    private class CommonIoHandler extends IoHandlerAdapter{
         @Override
         public void messageReceived(IoSession session, Object message) throws Exception {
-            MessageRequest messageRequest = (MessageRequest)message;
-            String handlerName = messageRequest.getServerMethod();
+            CommonMessage messageRequest = (CommonMessage)message;
+            String handlerName = messageRequest.getCallMethod();
             String clazzName = handlerName.substring(0,handlerName.indexOf("."));
             String methodName = handlerName.substring(handlerName.indexOf(".") + 1,handlerName.length());
+            StopWatch clock = new StopWatch();
+            clock.start();
+            JSONObject nickNameJson = JSON.parseObject(messageRequest.getCallMethodParameters());
+            clock.stop();
+            LOGGER.info("parse json take "+clock.getTime()+" ms");
+            session.setAttribute("nickName",nickNameJson.get("nickName"));
 
-            MessageRequest result = (MessageRequest)ClassUtils.invokeMethod(ac.getBean(clazzName),
-                    methodName,new Class<?>[]{String.class},new String[]{messageRequest.getServerMethodParameters()});
-
+            clock.reset();
+            clock.start();
+            CommonMessage result = (CommonMessage)ClassUtils.invokeMethod(ac.getBean(clazzName),
+                    methodName,new Class<?>[]{String.class},new String[]{messageRequest.getCallMethodParameters()});
+//            Invokers.Invoker invoker =
+//                    Invokers.newInvoker(ac.getBean(clazzName).getClass().getMethod(methodName,String.class));
+//            CommonMessage result =(CommonMessage)invoker.invoke(ac.getBean(clazzName),new String[]{messageRequest.getCallMethodParameters()});
+            clock.stop();
+            LOGGER.info("invoke method " + methodName + " take " + clock.getTime() + " ms");
             super.messageReceived(session, message);
-            LOGGER.info("server is send message");
             session.write(result);
+        }
+
+        @Override
+        public void sessionOpened(IoSession session) throws Exception {
+            BroadcastHandler.addSession(session);
+            super.sessionOpened(session);
         }
 
         @Override
@@ -81,6 +104,7 @@ public class MainServer {
 //            session.write("codec error");
             //session.close(true);
         }
+
     }
     private static IoHandler createIoHandlerUseStateMachine() {
         StateMachine sm = StateMachineFactory.getInstance(

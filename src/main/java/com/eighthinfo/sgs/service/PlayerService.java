@@ -1,8 +1,7 @@
 package com.eighthinfo.sgs.service;
 
 import com.eighthinfo.sgs.domain.RoomPlayer;
-
-import java.util.List;
+import com.eighthinfo.sgs.message.CommonMessage;
 
 
 /**
@@ -11,6 +10,6 @@ import java.util.List;
  */
 public interface PlayerService {
 
-    List<RoomPlayer> enterRoom(String nickName,String roomId);
+    CommonMessage enterRoom(String args);
 
 }

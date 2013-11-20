@@ -2,7 +2,6 @@ package com.eighthinfo.sgs.message;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.FactoryBean;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,17 +10,17 @@ import org.springframework.beans.factory.FactoryBean;
  * Time: 下午4:15
  * To change this template use File | Settings | File Templates.
  */
-public class MessageHandler extends MessageRequest {
+public class MessageHandler extends CommonMessage {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(MessageHandler.class);
 
-    public MessageRequest enterRoom(String args){
+    public CommonMessage enterRoom(String args){
         //LOGGER.info("in server side MessageHandler.enterRoom "+args);
         String roomInfo =
         "{\"roomId\": \"r1\",\"seatNo\":3,\"players\":[{\"nickName\":\"u1\",\"seatNo\":1},{\"nickName\":\"u2\",\"seatNo\":2}]}\n";
-        MessageRequest messageResponse = new MessageRequest();
-        messageResponse.setServerMethod("aaa");
-        messageResponse.setServerMethodParameters(roomInfo);
+        CommonMessage messageResponse = new CommonMessage();
+        messageResponse.setCallMethod("aaa");
+        messageResponse.setCallMethodParameters(roomInfo);
         return messageResponse;
     }
 }

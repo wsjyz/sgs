@@ -13,8 +13,15 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public interface PlayerDAO {
+    /**
+     *
+     * @param nickName
+     * @param roomId
+     * @return   座位号
+     */
+    int savePlayerRoom(String nickName,String roomId);
 
-    void savePlayerRoom(String nickName,String roomId);
+    int findRoomPlayerCounts(String nickName,String roomId);
 
     List<RoomPlayer> findRoomPlayer(String roomId);
 }

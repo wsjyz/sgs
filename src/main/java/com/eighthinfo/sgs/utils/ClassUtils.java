@@ -1,6 +1,7 @@
 package com.eighthinfo.sgs.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -98,14 +99,23 @@ public class ClassUtils {
     public static Object invokeMethod(final Object obj,
                                       final String methodName, final Class<?>[] parameterTypes,
                                       final Object[] args) {
+        StopWatch clock = new StopWatch();
+        clock.start();
         Method method = obtainAccessibleMethod(obj, methodName, parameterTypes);
+        clock.stop();
+        System.out.println("obtainAccessibleMethod take "+clock.getTime());
         if (method == null) {
             throw new IllegalArgumentException(
                     "Devkit: Could not find method [" + methodName
                             + "] on target [" + obj + "].");
         }
         try {
-            return method.invoke(obj, args);
+            clock.reset();
+            clock.start();
+            Object object =  method.invoke(obj, args);
+            clock.stop();
+            System.out.println("method invoke take "+clock.getTime());
+            return object;
         } catch (IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException e) {
             e.printStackTrace();

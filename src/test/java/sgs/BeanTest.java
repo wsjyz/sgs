@@ -1,6 +1,6 @@
 package sgs;
 
-import com.eighthinfo.sgs.message.MessageResponse;
+
 import com.eighthinfo.sgs.utils.ClassUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -16,7 +16,7 @@ public class BeanTest {
 
     public static void main(String[] args){
         ApplicationContext ac = new ClassPathXmlApplicationContext("spring-config.xml");
-        MessageResponse result = (MessageResponse)ClassUtils.invokeMethod(ac.getBean("messageHandler"),"enterRoom",new Class<?>[]{String.class},new String[]{"222"});
-        System.out.println(result.getClientMethodParameters());
+//        MessageResponse result = (MessageResponse)ClassUtils.invokeMethod(ac.getBean("messageHandler"),"enterRoom",new Class<?>[]{String.class},new String[]{"222"});
+//        System.out.println(result.getClientMethodParameters());
     }
 }

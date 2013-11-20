@@ -12,4 +12,38 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class MessageBase {
 
+    private String callMethod;
+
+    private String callMethodParameters;
+
+    public String getCallMethodParameters() {
+        return callMethodParameters;
+    }
+
+    public void setCallMethodParameters(String callMethodParameters) {
+        this.callMethodParameters = callMethodParameters;
+    }
+
+    public String getCallMethod() {
+        return callMethod;
+    }
+
+    public void setCallMethod(String callMethod) {
+        this.callMethod = callMethod;
+    }
+
+    public byte[] toBytes() throws Exception {
+        byte[] params = getCallMethodParameters().getBytes();
+        int serverMethodNameLength = Constants.MESSAGE_SERVICE_NAME_LENGTH;
+        int len = serverMethodNameLength  + params.length;
+        byte[] bytes = new byte[len];
+        String serverMethodName = StringUtils.rightPad(getCallMethod(), serverMethodNameLength,
+                Constants.MESSAGE_NAME_PAD_CHAR);
+
+        serverMethodName = serverMethodName.substring(0, serverMethodNameLength);
+
+        System.arraycopy(serverMethodName.getBytes(), 0, bytes, 0, serverMethodNameLength);
+        System.arraycopy(params, 0, bytes, serverMethodNameLength, params.length);
+        return bytes;
+    }
 }
