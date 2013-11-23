@@ -1,6 +1,7 @@
 package com.eighthinfo.sgs.message;
 
 import com.eighthinfo.sgs.Constants;
+import com.eighthinfo.sgs.utils.JSONUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -14,13 +15,13 @@ public class MessageBase {
 
     private String callMethod;
 
-    private String callMethodParameters;
+    private Object callMethodParameters;
 
-    public String getCallMethodParameters() {
+    public Object getCallMethodParameters() {
         return callMethodParameters;
     }
 
-    public void setCallMethodParameters(String callMethodParameters) {
+    public void setCallMethodParameters(Object callMethodParameters) {
         this.callMethodParameters = callMethodParameters;
     }
 
@@ -33,7 +34,7 @@ public class MessageBase {
     }
 
     public byte[] toBytes() throws Exception {
-        byte[] params = getCallMethodParameters().getBytes();
+        byte[] params = JSONUtils.toJSONStringBytes(getCallMethodParameters());
         int serverMethodNameLength = Constants.MESSAGE_SERVICE_NAME_LENGTH;
         int len = serverMethodNameLength  + params.length;
         byte[] bytes = new byte[len];

@@ -21,7 +21,7 @@ public class BroadcastHandler {
         for(IoSession session:sessions){
             if(session.isConnected() ){
 
-                String nickName = session.getAttribute("nickName").toString();
+                String nickName = session.getAttribute("userId").toString();
                 if(broadcastMessage.getReceivers().contains(nickName)){
                     session.write(broadcastMessage.getCallMethodParameters());
                 }

@@ -10,11 +10,31 @@ public class RoomPlayer {
 
     private String id;
 
+    private String userId;
+
     private String roomId;
 
     private String nickName;
+    //此字段虽然在player中已经有了，但是为了提高查询速度，且该字段不会经常变，所以当做冗余字段来使用
+    private int male;
 
     private int seatNo;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public int getMale() {
+        return male;
+    }
+
+    public void setMale(int male) {
+        this.male = male;
+    }
 
     public int getSeatNo() {
         return seatNo;

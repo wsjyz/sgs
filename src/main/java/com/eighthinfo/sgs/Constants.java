@@ -15,5 +15,25 @@ public interface Constants {
 
     char MESSAGE_NAME_PAD_CHAR = ' ';
 
+    String ON_ENTER_ROOM = "onEnterRoom";
+
+    String ON_OTHER_USER_COME_IN = "onOtherUserComeIn";
+
+    String ON_PLAYER_READY = "onPlayerReady";
+
+    String ON_GAME_START = "onGameStart";
+
+    String ON_ANSWER_COMPLETE ="onAnswerComplete";
+
+    String ON_ANSWER_WRONG ="onAnswerWrong";
+
+    String ON_CURRENT_PLAYER_CHANGE= "onCurrentPlayerChange";
+
+    String ON_ROUND_FINISHED = "onRoundFinished";
+
+    String ON_GAME_OVER = "onGameOver";
+
+    String ON_OTHER_USER_LEFT = "onOtherUserLeft";
+
 
 }

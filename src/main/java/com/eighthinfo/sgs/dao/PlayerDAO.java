@@ -14,14 +14,13 @@ import java.util.Map;
  */
 public interface PlayerDAO {
     /**
-     *
-     * @param nickName
-     * @param roomId
      * @return   座位号
      */
-    int savePlayerRoom(String nickName,String roomId);
+    int savePlayerRoom(RoomPlayer roomPlayer);
 
-    int findRoomPlayerCounts(String nickName,String roomId);
+    int findRoomPlayerCounts(String userId,String roomId);
 
     List<RoomPlayer> findRoomPlayer(String roomId);
+
+    void removePlayerRoom(RoomPlayer roomPlayer);
 }

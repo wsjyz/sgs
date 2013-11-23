@@ -25,9 +25,12 @@ public class PlayerDAOImpl extends BaseDAO implements PlayerDAO {
 
 
     @Override
-    public int savePlayerRoom(String nickName, String roomId) {
+    public int savePlayerRoom(RoomPlayer roomPlayer) {
 
-        if(findRoomPlayerCounts(nickName,roomId) > 0){
+        String userId = roomPlayer.getUserId();
+        String roomId = roomPlayer.getRoomId();
+
+        if(findRoomPlayerCounts(userId,roomId) > 0){
               return 0;
         }
 
@@ -37,27 +40,27 @@ public class PlayerDAOImpl extends BaseDAO implements PlayerDAO {
             seatNo = seatNo + 1;
         }
 
-        if(org.apache.commons.lang3.StringUtils.isNotBlank(nickName)
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(userId)
                 && org.apache.commons.lang3.StringUtils.isNotBlank(roomId)){
 
-            getJdbcTemplate().update("insert into t_room_player(id,nick_name,seat_no,room_id) values(?,?,?,?)",
-                    StringUtils.genUUID(), nickName,seatNo, roomId);
+            getJdbcTemplate().update("insert into t_room_player(id,userId,nick_name,male,seat_no,room_id) values(?,?,?,?,?,?)",
+                    StringUtils.genUUID(), userId,roomPlayer.getNickName(),roomPlayer.getMale(),seatNo, roomId);
 
         }
         return seatNo;
     }
 
     @Override
-    public int findRoomPlayerCounts(String nickName, String roomId) {
+    public int findRoomPlayerCounts(String userId, String roomId) {
         String sql = "select count(*) from t_room_player where room_id=? and nick_name=?";
-        int counts = getJdbcTemplate().queryForInt(sql,new Object[]{roomId,nickName});
+        int counts = getJdbcTemplate().queryForInt(sql,new Object[]{roomId,userId});
         return counts;
     }
 
     @Override
     public List<RoomPlayer> findRoomPlayer(String roomId) {
 
-        String sql = "select nick_name,seat_no from t_room_player where room_id=?";
+        String sql = "select user_id,nick_name,male,seat_no from t_room_player where room_id=?";
 
         return getJdbcTemplate().query(sql,new Object[]{roomId},new RowMapper<RoomPlayer>() {
             @Override
@@ -66,10 +69,27 @@ public class PlayerDAOImpl extends BaseDAO implements PlayerDAO {
                 RoomPlayer roomPlayer = new RoomPlayer();
 
                 roomPlayer.setNickName(resultSet.getString("nick_name"));
+                roomPlayer.setMale(resultSet.getInt("male"));
                 roomPlayer.setSeatNo(resultSet.getInt("seat_no"));
+                roomPlayer.setUserId(resultSet.getString("user_id"));
                 return roomPlayer;
             }
         });
 
+    }
+
+    @Override
+    public void removePlayerRoom(RoomPlayer roomPlayer) {
+
+        String userId = roomPlayer.getUserId();
+        String roomId = roomPlayer.getRoomId();
+
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(userId)
+                && org.apache.commons.lang3.StringUtils.isNotBlank(roomId)){
+
+        getJdbcTemplate().update("delete from t_room_player where user_id=? and room_id=?",
+                    userId, roomId);
+
+        }
     }
 }

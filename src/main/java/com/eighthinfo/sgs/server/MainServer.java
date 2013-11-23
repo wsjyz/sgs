@@ -73,22 +73,25 @@ public class MainServer {
             String methodName = handlerName.substring(handlerName.indexOf(".") + 1,handlerName.length());
             StopWatch clock = new StopWatch();
             clock.start();
-            JSONObject nickNameJson = JSON.parseObject(messageRequest.getCallMethodParameters());
+            JSONObject nickNameJson = JSON.parseObject(messageRequest.getCallMethodParameters().toString());
             clock.stop();
             LOGGER.info("parse json take "+clock.getTime()+" ms");
-            session.setAttribute("nickName",nickNameJson.get("nickName"));
+            session.setAttribute("userId",nickNameJson.get("userId"));
 
             clock.reset();
             clock.start();
             CommonMessage result = (CommonMessage)ClassUtils.invokeMethod(ac.getBean(clazzName),
-                    methodName,new Class<?>[]{String.class},new String[]{messageRequest.getCallMethodParameters()});
+                    methodName,new Class<?>[]{String.class},new String[]{messageRequest.getCallMethodParameters().toString()});
 //            Invokers.Invoker invoker =
 //                    Invokers.newInvoker(ac.getBean(clazzName).getClass().getMethod(methodName,String.class));
 //            CommonMessage result =(CommonMessage)invoker.invoke(ac.getBean(clazzName),new String[]{messageRequest.getCallMethodParameters()});
             clock.stop();
             LOGGER.info("invoke method " + methodName + " take " + clock.getTime() + " ms");
             super.messageReceived(session, message);
-            session.write(result);
+            if(result != null){
+                session.write(result);
+            }
+
         }
 
         @Override
