@@ -44,7 +44,7 @@ public class PlayerDAOImpl extends BaseDAO implements PlayerDAO {
                 && org.apache.commons.lang3.StringUtils.isNotBlank(roomId)){
 
             getJdbcTemplate().update("insert into t_room_player(id,userId,nick_name,male,seat_no,room_id) values(?,?,?,?,?,?)",
-                    StringUtils.genUUID(), userId,roomPlayer.getNickName(),roomPlayer.getMale(),seatNo, roomId);
+                    StringUtils.genShortPK(), userId,roomPlayer.getNickName(),roomPlayer.getMale(),seatNo, roomId);
 
         }
         return seatNo;
@@ -72,6 +72,7 @@ public class PlayerDAOImpl extends BaseDAO implements PlayerDAO {
                 roomPlayer.setMale(resultSet.getInt("male"));
                 roomPlayer.setSeatNo(resultSet.getInt("seat_no"));
                 roomPlayer.setUserId(resultSet.getString("user_id"));
+                roomPlayer.setRoomId(resultSet.getString("room_id"));
                 return roomPlayer;
             }
         });
@@ -84,11 +85,18 @@ public class PlayerDAOImpl extends BaseDAO implements PlayerDAO {
         String userId = roomPlayer.getUserId();
         String roomId = roomPlayer.getRoomId();
 
-        if(org.apache.commons.lang3.StringUtils.isNotBlank(userId)
-                && org.apache.commons.lang3.StringUtils.isNotBlank(roomId)){
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(userId)){
 
-        getJdbcTemplate().update("delete from t_room_player where user_id=? and room_id=?",
-                    userId, roomId);
+            if(org.apache.commons.lang3.StringUtils.isNotBlank(roomId)){
+                getJdbcTemplate().update("delete from t_room_player where user_id=? and room_id=?",
+                        userId, roomId);
+            }else{
+
+                getJdbcTemplate().update("delete from t_room_player where user_id=?",
+                        userId);
+
+            }
+
 
         }
     }

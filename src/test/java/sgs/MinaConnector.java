@@ -1,6 +1,7 @@
 package sgs;
 
 import com.eighthinfo.sgs.codec.SgsCodecFactory;
+import com.eighthinfo.sgs.domain.RoomPlayer;
 import com.eighthinfo.sgs.message.CommonMessage;
 import org.apache.mina.core.RuntimeIoException;
 import org.apache.mina.core.future.ConnectFuture;
@@ -78,7 +79,10 @@ public class MinaConnector {
         minaConnector.connect();
         CommonMessage messageRequest = new CommonMessage();
         messageRequest.setCallMethod("playerService.enterRoom");
-        messageRequest.setCallMethodParameters("{\"nickName\":\"abc\"}");
+        RoomPlayer roomPlayer = new RoomPlayer();
+        roomPlayer.setUserId("jyz");
+        roomPlayer.setNickName("bit");
+        messageRequest.setCallMethodParameters(roomPlayer);
         minaConnector.sendCommand(messageRequest);
         //minaConnector.disconnect();
     }

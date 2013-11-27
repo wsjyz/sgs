@@ -14,7 +14,33 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>3.1.2.RELEASE</spring.version>
   </properties>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.0</version>
+                <configuration>
+                    <!-- put your configurations here -->
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.eighthinfo.sgs.server.MainServer</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
   <dependencies>
       <dependency>
           <groupId>junit</groupId>
@@ -48,6 +74,11 @@
           <artifactId>mina-statemachine</artifactId>
           <version>2.0.7</version>
       </dependency>
+      <dependency>
+          <groupId>org.apache.mina</groupId>
+          <artifactId>mina-integration-spring</artifactId>
+          <version>1.1.7</version>
+      </dependency>
       <!-- slf4j -->
       <dependency>
           <groupId>org.slf4j</groupId>
@@ -64,6 +95,11 @@
           <groupId>org.apache.commons</groupId>
           <artifactId>commons-lang3</artifactId>
           <version>3.1</version>
+      </dependency>
+      <dependency>
+          <groupId>commons-collections</groupId>
+          <artifactId>commons-collections</artifactId>
+          <version>3.2.1</version>
       </dependency>
       <dependency>
           <groupId>com.alibaba</groupId>
@@ -85,6 +121,16 @@
           <groupId>javassist</groupId>
           <artifactId>javassist</artifactId>
           <version>3.12.1.GA</version>
+      </dependency>
+      <dependency>
+          <groupId>org.springframework.data</groupId>
+          <artifactId>spring-data-redis</artifactId>
+          <version>1.1.0.RELEASE</version>
+      </dependency>
+      <dependency>
+          <groupId>redis.clients</groupId>
+          <artifactId>jedis</artifactId>
+          <version>2.1.0</version>
       </dependency>
   </dependencies>
 </project>

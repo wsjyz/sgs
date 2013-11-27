@@ -103,7 +103,6 @@ public class ClassUtils {
         clock.start();
         Method method = obtainAccessibleMethod(obj, methodName, parameterTypes);
         clock.stop();
-        System.out.println("obtainAccessibleMethod take "+clock.getTime());
         if (method == null) {
             throw new IllegalArgumentException(
                     "Devkit: Could not find method [" + methodName
@@ -114,7 +113,6 @@ public class ClassUtils {
             clock.start();
             Object object =  method.invoke(obj, args);
             clock.stop();
-            System.out.println("method invoke take "+clock.getTime());
             return object;
         } catch (IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException e) {

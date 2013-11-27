@@ -34,7 +34,15 @@ public class MessageBase {
     }
 
     public byte[] toBytes() throws Exception {
-        byte[] params = JSONUtils.toJSONStringBytes(getCallMethodParameters());
+
+        byte[] params = null;
+        //fastjson这里有个问题，如果对象是String，则会在把{两端加"",导致反序列化出错;
+        if(getCallMethodParameters() instanceof String){
+            params = getCallMethodParameters().toString().getBytes();
+        }else{
+            params = JSONUtils.toJSONStringBytes(getCallMethodParameters());
+        }
+
         int serverMethodNameLength = Constants.MESSAGE_SERVICE_NAME_LENGTH;
         int len = serverMethodNameLength  + params.length;
         byte[] bytes = new byte[len];
