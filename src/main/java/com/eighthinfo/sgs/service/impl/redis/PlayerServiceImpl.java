@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,40 +47,55 @@ public class PlayerServiceImpl implements PlayerService {
         JSONObject jsonObject = JSON.parseObject(args);
         String userId = jsonObject.getString("userId");
         String nickName = jsonObject.getString("nickName");
+        String awardId = jsonObject.getString("awardId");
 
         if(org.apache.commons.lang3.StringUtils.isBlank(userId)
                 || org.apache.commons.lang3.StringUtils.isBlank(nickName)){
             LOGGER.warn("userId and nickName can't be empty!");
              return null;
         }
+        //验证是否已在房间内
+        String userRoomInfo = redisTemplate.boundValueOps(userId).get();
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(userRoomInfo)){
+            LOGGER.warn("the user "+userId+" is already in room");
+            return null;
+        }
+        roomPlayer.setUserId(userId);
+        roomPlayer.setNickName(nickName);
+        roomPlayer.setAwardId(awardId);
 
-        //查找应该进入的房间
-
-        //TODO the key 'hallSet' should configurable
-        Set<ZSetOperations.TypedTuple<String>> set = redisTemplate.boundZSetOps("hallSet").reverseRangeWithScores(0,-1);
+        //查找应该进入的房间,根据奖品ID来查找，该类奖品下房间的情况
+        Set<ZSetOperations.TypedTuple<String>> set = redisTemplate.boundZSetOps(awardId).reverseRangeByScoreWithScores(0,4);
 
         AtomicBoolean hasRoom = new AtomicBoolean(false);
 
         if(set.isEmpty()){ //第一个人、没有房间
             hasRoom.set(false);
         }else{
-            for(ZSetOperations.TypedTuple typedTuple:set){
-               if(typedTuple.getScore() < 6 ){//有房间
-                   roomPlayer.setRoomId(typedTuple.getValue().toString());
-                   AtomicInteger seatNo = new AtomicInteger(typedTuple.getScore().intValue());
-                   roomPlayer.setSeatNo(seatNo.incrementAndGet());
-                   hasRoom.set(true);
-               }
+            Iterator<ZSetOperations.TypedTuple<String>> itor = set.iterator();
+            if(itor.hasNext()){//有人数未满的房间
+                ZSetOperations.TypedTuple<String> typedTuple = itor.next();
+
+                String roomId = typedTuple.getValue();
+                roomPlayer.setRoomId(roomId);
+                AtomicInteger seatNo = new AtomicInteger(typedTuple.getScore().intValue());
+                roomPlayer.setSeatNo(seatNo.incrementAndGet());
+                redisTemplate.boundZSetOps(awardId).incrementScore(roomPlayer.getRoomId(), 1);
+                hasRoom.set(true);
+
             }
         }
         //新建一个房间
         if(!hasRoom.get()){
-            roomPlayer.setRoomId(StringUtils.genShortPK());
-            roomPlayer.setSeatNo(1);
+            String roomId = StringUtils.genShortPK();
+            roomPlayer.setRoomId(roomId);
+            roomPlayer.setSeatNo(0);
+            redisTemplate.boundZSetOps(awardId).add(roomId, 0);
         }
         String roomPlayerStr = JSON.toJSONString(roomPlayer);
         redisTemplate.boundListOps(roomPlayer.getRoomId()).rightPush(roomPlayerStr);
         redisTemplate.boundValueOps(userId).set(roomPlayerStr);
+
 
         List<String> stringList = redisTemplate.boundListOps(roomPlayer.getRoomId()).range(0,5);
 
@@ -103,6 +119,9 @@ public class PlayerServiceImpl implements PlayerService {
     public CommonMessage playerReady(String args) {
 
         JSONObject jsonObject = JSON.parseObject(args);
+        if(jsonObject.get("roomId") == null || jsonObject.get("userId") == null){
+            return null;
+        }
 
         String roomId = jsonObject.get("roomId").toString();
         String userId = jsonObject.get("userId").toString();
@@ -125,17 +144,40 @@ public class PlayerServiceImpl implements PlayerService {
             LOGGER.warn("userId can't be empty!");
             return null;
         }
+        if(!redisTemplate.hasKey(userId)){
+            LOGGER.warn("can't find userId:"+userId);
+            return null;
+        }
         RoomPlayer roomPlayer = JSON.parseObject(redisTemplate.boundValueOps(userId).get(),RoomPlayer.class);
 
-        //TODO needTest
-        redisTemplate.boundListOps(roomPlayer.getRoomId()).remove(1,JSON.toJSONString(roomPlayer));
 
-        List<String> stringList = redisTemplate.boundListOps(roomPlayer.getRoomId()).range(0,5);
+        //从房间用户列表中删除当前用户
+        String roomId = roomPlayer.getRoomId();
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(roomId)){
+            redisTemplate.boundListOps(roomPlayer.getRoomId()).remove(1,JSON.toJSONString(roomPlayer));
+        }
+        //减少此房间的人数
+        int roomPlayerCounts = 0;
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(roomPlayer.getAwardId())){
 
-        List<RoomPlayer> playerList =  parseStringToObject(stringList);
+            roomPlayerCounts = redisTemplate.boundZSetOps(roomPlayer.getAwardId())
+                    .incrementScore(roomPlayer.getRoomId(),-1).intValue();
 
-        broadcastToOther(roomPlayer.getUserId(),playerList,
-                Constants.ON_OTHER_USER_LEFT,roomPlayer);
+            if(roomPlayerCounts <= 0){  //所有人都退出了删除排名中的房间
+                redisTemplate.boundZSetOps(roomPlayer.getAwardId()).remove(roomPlayer.getRoomId());
+            }else{
+                List<String> stringList = redisTemplate.boundListOps(roomPlayer.getRoomId()).range(0,5);
+
+                List<RoomPlayer> playerList =  parseStringToObject(stringList);
+
+                broadcastToOther(roomPlayer.getUserId(),playerList,
+                        Constants.ON_OTHER_USER_LEFT,roomPlayer);
+            }
+        }
+
+
+        //删除当前用户信息
+        redisTemplate.delete(userId);
 
         return null;
     }

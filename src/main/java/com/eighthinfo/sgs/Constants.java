@@ -35,5 +35,5 @@ public interface Constants {
 
     String ON_OTHER_USER_LEFT = "onOtherUserLeft";
 
-
+    String ON_ERROR_OCCUR = "onErrorOccur";
 }

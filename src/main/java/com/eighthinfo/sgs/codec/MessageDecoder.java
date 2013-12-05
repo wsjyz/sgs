@@ -31,14 +31,13 @@ public class MessageDecoder extends CumulativeProtocolDecoder {
             byte[] messageNameBytes = new byte[operateNameLength];
             System.arraycopy(bytes, 0, messageNameBytes, 0, operateNameLength);
             String messageName = StringUtils.trim(new String(messageNameBytes));
-            LOGGER.info("receive message name "+messageName);
 
 
             byte[] messageBodyBytes = new byte[length - operateNameLength];
             System.arraycopy(bytes, operateNameLength, messageBodyBytes, 0,
                     length - operateNameLength);
             String messageBody = new String(messageBodyBytes);
-            LOGGER.info("receive message body "+messageBody);
+            LOGGER.info("receive client "+ioSession.getLocalAddress()+" message name: "+messageName+" body: "+messageBody);
             CommonMessage messageRequest = new CommonMessage();
             messageRequest.setCallMethod(messageName);
             messageRequest.setCallMethodParameters(messageBody);

@@ -17,6 +17,16 @@ public class MessageBase {
 
     private Object callMethodParameters;
 
+    private boolean haveError;
+
+    public boolean getHaveError() {
+        return haveError;
+    }
+
+    public void setHaveError(boolean haveError) {
+        this.haveError = haveError;
+    }
+
     public Object getCallMethodParameters() {
         return callMethodParameters;
     }

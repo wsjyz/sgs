@@ -20,6 +20,16 @@ public class RoomPlayer {
 
     private int seatNo;
 
+    private String awardId;
+
+    public String getAwardId() {
+        return awardId;
+    }
+
+    public void setAwardId(String awardId) {
+        this.awardId = awardId;
+    }
+
     public String getUserId() {
         return userId;
     }

@@ -13,6 +13,7 @@ import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import java.net.InetSocketAddress;
+import java.util.Scanner;
 
 /**
  * Created with IntelliJ IDEA.
@@ -69,7 +70,8 @@ public class MinaConnector {
     public class ClientHandler extends IoHandlerAdapter{
         @Override
         public void messageReceived(IoSession session, Object message) throws Exception {
-            System.out.println("client receive message");
+            CommonMessage msg = (CommonMessage)message;
+            System.out.println("client receive message callMethod:"+msg.getCallMethod()+" args:"+msg.getCallMethodParameters());
             super.messageReceived(session, message);
         }
     }
@@ -77,13 +79,24 @@ public class MinaConnector {
         MinaConnector minaConnector = new MinaConnector("localhost",9110);
         minaConnector.setHandler(minaConnector.new ClientHandler());
         minaConnector.connect();
-        CommonMessage messageRequest = new CommonMessage();
-        messageRequest.setCallMethod("playerService.enterRoom");
-        RoomPlayer roomPlayer = new RoomPlayer();
-        roomPlayer.setUserId("jyz");
-        roomPlayer.setNickName("bit");
-        messageRequest.setCallMethodParameters(roomPlayer);
-        minaConnector.sendCommand(messageRequest);
+
+        Scanner s = new Scanner(System.in);
+        while(true){
+            System.out.println("please input method name:");
+            String methodName = s.next();
+            CommonMessage messageRequest = new CommonMessage();
+            messageRequest.setCallMethod(methodName);
+            System.out.println("please input method args:");
+            messageRequest.setCallMethodParameters(s.next());
+            minaConnector.sendCommand(messageRequest);
+            System.out.println("please input next command:");
+            String command = s.next();
+            if(command == null || command.equals("")){
+                break;
+            }
+            continue;
+        }
+
         //minaConnector.disconnect();
     }
 }

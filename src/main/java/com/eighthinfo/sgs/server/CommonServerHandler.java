@@ -37,7 +37,6 @@ public class CommonServerHandler extends IoHandlerAdapter {
         clock.stop();
         LOGGER.info("parse json take "+clock.getTime()+" ms");
         session.setAttribute("userId",nickNameJson.get("userId"));
-
         clock.reset();
         clock.start();
         CommonMessage result = (CommonMessage) ClassUtils.invokeMethod(ac.getBean(clazzName),
@@ -45,6 +44,7 @@ public class CommonServerHandler extends IoHandlerAdapter {
 //            Invokers.Invoker invoker =
 //                    Invokers.newInvoker(ac.getBean(clazzName).getClass().getMethod(methodName,String.class));
 //            CommonMessage result =(CommonMessage)invoker.invoke(ac.getBean(clazzName),new String[]{messageRequest.getCallMethodParameters()});
+
         clock.stop();
         LOGGER.info("invoke method " + methodName + " take " + clock.getTime() + " ms");
         super.messageReceived(session, message);

@@ -1,5 +1,7 @@
 package com.eighthinfo.sgs.utils;
 
+import com.eighthinfo.sgs.Constants;
+import com.eighthinfo.sgs.message.CommonMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.util.ReflectionUtils;
@@ -101,6 +103,7 @@ public class ClassUtils {
                                       final Object[] args) {
         StopWatch clock = new StopWatch();
         clock.start();
+        Object object = null;
         Method method = obtainAccessibleMethod(obj, methodName, parameterTypes);
         clock.stop();
         if (method == null) {
@@ -111,16 +114,59 @@ public class ClassUtils {
         try {
             clock.reset();
             clock.start();
-            Object object =  method.invoke(obj, args);
+            object =  method.invoke(obj, args);
             clock.stop();
-            return object;
-        } catch (IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException e) {
+
+        } catch (Exception e) {
+            CommonMessage commonMessage = new CommonMessage();
+            printStackTrace(e);
+            commonMessage.setCallMethodParameters(errorStr.toString());
+            commonMessage.setCallMethod(Constants.ON_ERROR_OCCUR);
+            commonMessage.setHaveError(true);
+            object = commonMessage;
             e.printStackTrace();
         }
-        return null;
+        return object;
     }
 
+    static StringBuffer errorStr = null;
+
+    private static void printStackTrace(Throwable t){
+        errorStr = new StringBuffer("");
+        errorStr.append("异常:\t"+t.getClass()+" message:"+t.getMessage()+"\n");
+        StackTraceElement [] traceArray = t.getStackTrace();
+        for(StackTraceElement element:traceArray){
+            String errorInfo = element.toString();
+            if(errorInfo != null && (errorInfo.indexOf("com.eighthinfo") != -1 )){
+                errorStr.append("\t"+errorInfo+"\n");
+            }
+        }
+        Throwable ourCause = t.getCause();
+        if (ourCause != null)
+            printStackTraceAsCause(ourCause,traceArray);
+    }
+    private static void printStackTraceAsCause(Throwable cause,StackTraceElement[] causedTrace){
+        StackTraceElement[] trace = cause.getStackTrace();
+        int m = trace.length-1, n = causedTrace.length-1;
+        while (m >= 0 && n >=0 && trace[m].equals(causedTrace[n])) {
+            m--; n--;
+        }
+        int framesInCommon = trace.length - 1 - m;
+        errorStr.append("原因: "+cause.getClass() +"\n");
+        for (int i=0; i <= m; i++){
+            String errorInfo = trace[i].toString();
+            if(errorInfo != null && (errorInfo.indexOf("com.eighthinfo") != -1)){
+                errorStr.append("\tat "+errorInfo+"\n");
+            }
+        }
+
+        if (framesInCommon != 0)
+            errorStr.append("\t... " + framesInCommon + " more");
+
+        Throwable ourCause = cause.getCause();
+        if (ourCause != null)
+            printStackTraceAsCause(ourCause, trace);
+    }
     /**循环向上转型，获取对象的DeclaredMethod,并强制设置为可访问
      * 如向上转型到Object仍无法找到，返回null
      *
