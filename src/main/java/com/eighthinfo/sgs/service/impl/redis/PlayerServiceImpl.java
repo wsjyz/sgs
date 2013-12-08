@@ -48,6 +48,7 @@ public class PlayerServiceImpl implements PlayerService {
         String userId = jsonObject.getString("userId");
         String nickName = jsonObject.getString("nickName");
         String awardId = jsonObject.getString("awardId");
+        int male = jsonObject.getIntValue("male");
 
         if(org.apache.commons.lang3.StringUtils.isBlank(userId)
                 || org.apache.commons.lang3.StringUtils.isBlank(nickName)){
@@ -63,6 +64,7 @@ public class PlayerServiceImpl implements PlayerService {
         roomPlayer.setUserId(userId);
         roomPlayer.setNickName(nickName);
         roomPlayer.setAwardId(awardId);
+        roomPlayer.setMale(male);
 
         //查找应该进入的房间,根据奖品ID来查找，该类奖品下房间的情况
         Set<ZSetOperations.TypedTuple<String>> set = redisTemplate.boundZSetOps(awardId).reverseRangeByScoreWithScores(0,4);
