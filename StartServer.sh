@@ -1,0 +1,1 @@
+nohup java -jar -DAPP_HOME=/work > /work/log/cron.log &
