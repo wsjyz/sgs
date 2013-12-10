@@ -13,6 +13,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>3.1.2.RELEASE</spring.version>
+    <mina.version>2.0.7</mina.version>
   </properties>
     <build>
         <plugins>
@@ -86,17 +87,32 @@
       <dependency>
           <groupId>org.apache.mina</groupId>
           <artifactId>mina-core</artifactId>
-          <version>2.0.7</version>
+          <version>${mina.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.mina</groupId>
           <artifactId>mina-statemachine</artifactId>
-          <version>2.0.7</version>
+          <version>${mina.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.mina</groupId>
           <artifactId>mina-integration-spring</artifactId>
           <version>1.1.7</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.mina</groupId>
+          <artifactId>mina-integration-jmx</artifactId>
+          <version>${mina.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.mina</groupId>
+          <artifactId>mina-integration-ognl</artifactId>
+          <version>${mina.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.mina</groupId>
+          <artifactId>mina-integration-beans</artifactId>
+          <version>${mina.version}</version>
       </dependency>
       <!-- slf4j -->
       <dependency>

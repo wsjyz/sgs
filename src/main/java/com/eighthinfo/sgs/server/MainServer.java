@@ -13,6 +13,7 @@ import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.logging.LoggingFilter;
+import org.apache.mina.integration.jmx.IoServiceMBean;
 import org.apache.mina.statemachine.StateMachine;
 import org.apache.mina.statemachine.StateMachineFactory;
 import org.apache.mina.statemachine.StateMachineProxyBuilder;
@@ -26,7 +27,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import javax.management.*;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 
 /**
@@ -45,8 +48,6 @@ public class MainServer {
 
     private int port;
 
-
-    //static ApplicationContext ac = new ClassPathXmlApplicationContext("spring-config.xml");
     public MainServer(int port) {
         this.port = port;
         acceptor = new NioSocketAcceptor();
@@ -62,7 +63,7 @@ public class MainServer {
     public static void main(String[] args){
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("server-run.xml");
         NioSocketAcceptor socketAcceptor = (NioSocketAcceptor)applicationContext.getBean("ioAcceptor");
-
+        MainServer.createMBean(socketAcceptor);
 
         LOGGER.info("***************************************************");
         LOGGER.info("* MINA NIO Acceptor Listening socket in port:"+socketAcceptor.getDefaultLocalAddress().getPort()+" *");
@@ -70,7 +71,26 @@ public class MainServer {
 
 
     }
+    private static void createMBean(NioSocketAcceptor nioSocketAcceptor){
 
+        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+        IoServiceMBean acceptorMBean = new IoServiceMBean(nioSocketAcceptor);
+        ObjectName acceptorName = null;
+        try {
+            acceptorName = new ObjectName(nioSocketAcceptor.getClass()
+                    .getPackage().getName()
+                    + ":type=acceptor,name=" + nioSocketAcceptor.getClass().getSimpleName());
+        } catch (MalformedObjectNameException e) {
+            e.printStackTrace();
+        }
+        try {
+            mBeanServer.registerMBean(acceptorMBean, acceptorName);
+        } catch (InstanceAlreadyExistsException
+                | MBeanRegistrationException
+                | NotCompliantMBeanException e) {
+            e.printStackTrace();
+        }
+    }
     private static IoHandler createIoHandlerUseStateMachine() {
         StateMachine sm = StateMachineFactory.getInstance(
                 IoHandlerTransition.class).create(ServerHandler.NOT_CONNECTED,
