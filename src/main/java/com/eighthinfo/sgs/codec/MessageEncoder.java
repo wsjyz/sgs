@@ -1,6 +1,7 @@
 package com.eighthinfo.sgs.codec;
 
 import com.eighthinfo.sgs.message.CommonMessage;
+import com.eighthinfo.sgs.message.MessageBase;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolEncoderAdapter;
@@ -16,7 +17,7 @@ import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 public class MessageEncoder extends ProtocolEncoderAdapter {
     @Override
     public void encode(IoSession ioSession, Object o, ProtocolEncoderOutput protocolEncoderOutput) throws Exception {
-        CommonMessage message = (CommonMessage)o;
+        MessageBase message = (MessageBase)o;
         byte[] bytes = message.toBytes();
         IoBuffer buf = IoBuffer.allocate(bytes.length, false);
 
