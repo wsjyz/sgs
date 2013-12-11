@@ -180,7 +180,8 @@ public class PlayerServiceImpl implements PlayerService {
 
         //删除当前用户信息
         redisTemplate.delete(userId);
-
+        //从缓存中删除
+        BroadcastHandler.removeSession(userId);
         return null;
     }
 

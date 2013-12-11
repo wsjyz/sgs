@@ -33,4 +33,8 @@ public class BroadcastHandler {
         }
 
     }
+
+    public static void removeSession(String key){
+        sessions.remove(key);
+    }
 }

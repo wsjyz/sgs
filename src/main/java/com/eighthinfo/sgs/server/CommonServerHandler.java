@@ -27,10 +27,13 @@ public class CommonServerHandler extends IoHandlerAdapter {
 
     @Override
     public void messageReceived(IoSession session, Object message) throws Exception {
+
         CommonMessage messageRequest = (CommonMessage)message;
+
         String handlerName = messageRequest.getCallMethod();
         String clazzName = handlerName.substring(0,handlerName.indexOf("."));
         String methodName = handlerName.substring(handlerName.indexOf(".") + 1,handlerName.length());
+
         StopWatch clock = new StopWatch();
         clock.start();
         JSONObject nickNameJson = JSON.parseObject(messageRequest.getCallMethodParameters().toString());
@@ -49,9 +52,12 @@ public class CommonServerHandler extends IoHandlerAdapter {
 
         clock.stop();
         LOGGER.info("invoke method " + methodName + " take " + clock.getTime() + " ms");
+
         super.messageReceived(session, message);
         if(result != null){
-            session.write(result);
+            if(!session.isConnected()){
+                session.write(result);
+            }
         }
 
     }
@@ -74,7 +80,7 @@ public class CommonServerHandler extends IoHandlerAdapter {
         String userId = (String)session.getAttribute("userId");
 
         if(org.apache.commons.lang3.StringUtils.isNotBlank(userId)){
-            playerService.leftRoom("{\"userId\":\""+session.getAttribute("userId").toString()+"\"}");
+            playerService.leftRoom("{\"userId\":\""+userId+"\"}");
         }
         super.sessionClosed(session);
     }
