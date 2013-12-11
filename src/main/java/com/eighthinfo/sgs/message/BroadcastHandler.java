@@ -3,6 +3,7 @@ package com.eighthinfo.sgs.message;
 import org.apache.mina.core.session.IoSession;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * User: dam
@@ -10,23 +11,26 @@ import java.util.*;
  */
 public class BroadcastHandler {
 
-    private static final Set<IoSession> sessions = Collections
-            .synchronizedSet(new HashSet<IoSession>());
+    private static final ConcurrentHashMap<String,IoSession> sessions = new ConcurrentHashMap<String,IoSession>();
 
 
-    public static void addSession(IoSession session){
-        sessions.add(session);
+    public static void addSession(String key ,IoSession session){
+        sessions.putIfAbsent(key,session);
     }
     public static void broadcast(BroadcastMessage broadcastMessage){
-        for(IoSession session:sessions){
-            if(session.isConnected() ){
 
-                String nickName = session.getAttribute("userId").toString();
-                if(broadcastMessage.getReceivers().contains(nickName)){
-                    session.write(broadcastMessage.getCallMethodParameters());
+        for(Map.Entry<String,IoSession> entry : sessions.entrySet()){
+
+            String userId = entry.getKey();
+            IoSession session = entry.getValue();
+
+            if(broadcastMessage.getReceivers().contains(userId)){
+                if(session.isConnected()){
+                    session.write(broadcastMessage);
                 }
 
             }
         }
+
     }
 }

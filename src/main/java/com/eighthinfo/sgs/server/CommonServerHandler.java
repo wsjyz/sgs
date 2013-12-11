@@ -36,7 +36,9 @@ public class CommonServerHandler extends IoHandlerAdapter {
         JSONObject nickNameJson = JSON.parseObject(messageRequest.getCallMethodParameters().toString());
         clock.stop();
         LOGGER.info("parse json take "+clock.getTime()+" ms");
-        session.setAttribute("userId",nickNameJson.get("userId"));
+        String userId = (String)nickNameJson.get("userId");
+        session.setAttribute("userId",userId);
+        BroadcastHandler.addSession(userId,session);
         clock.reset();
         clock.start();
         CommonMessage result = (CommonMessage) ClassUtils.invokeMethod(ac.getBean(clazzName),
@@ -56,7 +58,6 @@ public class CommonServerHandler extends IoHandlerAdapter {
 
     @Override
     public void sessionOpened(IoSession session) throws Exception {
-        BroadcastHandler.addSession(session);
         super.sessionOpened(session);
     }
 
@@ -70,9 +71,11 @@ public class CommonServerHandler extends IoHandlerAdapter {
     public void sessionClosed(IoSession session) throws Exception {
 
         PlayerService playerService = (PlayerService)ac.getBean("playerService");
+        String userId = (String)session.getAttribute("userId");
 
-        playerService.leftRoom("{\"userId\":\""+session.getAttribute("userId").toString()+"\"}");
-
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(userId)){
+            playerService.leftRoom("{\"userId\":\""+session.getAttribute("userId").toString()+"\"}");
+        }
         super.sessionClosed(session);
     }
 }
