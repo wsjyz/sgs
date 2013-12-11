@@ -1,1 +1,1 @@
-nohup java -jar -DAPP_HOME=/work > /work/log/cron.log &
+nohup java -jar -DAPP_HOME=/work -Djava.rmi.server.hostname=192.168.1.99 -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=8084 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false sgs-1.0.jar | tee log/cron.log &
