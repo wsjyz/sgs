@@ -6,6 +6,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.eighthinfo.sgs.domain.RoomPlayer;
 import com.eighthinfo.sgs.utils.ClassUtils;
 import com.eighthinfo.sgs.utils.JSONUtils;
+import com.eighthinfo.sgs.utils.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -30,17 +31,22 @@ public class BeanTest {
 //        roomPlayer1.setNickName("1");
 //        roomPlayer1.setSeatNo(1);
 //
-//        RoomPlayer roomPlayer2 = new RoomPlayer();
-//        roomPlayer2.setNickName("2");
-//        roomPlayer2.setSeatNo(2);
+        RoomPlayer roomPlayer2 = new RoomPlayer();
+        roomPlayer2.setNickName("2");
+        roomPlayer2.setSeatNo(2);
+        roomPlayer2.setUserId(StringUtils.genShortPK());
+        roomPlayer2.setAwardId(StringUtils.genShortPK());
+        roomPlayer2.setRoomId(StringUtils.genShortPK());
+        roomPlayer2.setMale(1);
+       // System.out.println(MemoryCalculator.shallowSizeOf(roomPlayer2));
 //
 //        playerList.add(roomPlayer1);
 //        playerList.add(roomPlayer2);
 //        System.out.println(JSON.toJSONString(playerList));
-        try {
-            System.out.println(new String(JSONUtils.toJSONStringBytes("{\"userId\":\"abc\"}"),"UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+//        try {
+//            System.out.println(new String(JSONUtils.toJSONStringBytes("{\"userId\":\"abc\"}"),"UTF-8"));
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//        }
     }
 }

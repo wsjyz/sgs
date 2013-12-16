@@ -7,6 +7,7 @@ import com.eighthinfo.sgs.message.BroadcastHandler;
 import com.eighthinfo.sgs.message.CommonMessage;
 import com.eighthinfo.sgs.utils.ClassUtils;
 import com.eighthinfo.sgs.utils.Invokers;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoHandlerAdapter;
@@ -24,13 +25,22 @@ import org.apache.mina.statemachine.context.StateContextFactory;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.management.*;
+import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
+import java.util.Properties;
+import java.util.Scanner;
 
 /**
  * Created with IntelliJ IDEA.
@@ -45,6 +55,8 @@ public class MainServer {
             .getLogger(MainServer.class);
 
     private NioSocketAcceptor acceptor;
+
+    static ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("server-run.xml");
 
     private int port;
 
@@ -61,16 +73,33 @@ public class MainServer {
         acceptor.bind(new InetSocketAddress(port));
     }
     public static void main(String[] args){
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("server-run.xml");
-        NioSocketAcceptor socketAcceptor = (NioSocketAcceptor)applicationContext.getBean("ioAcceptor");
-        MainServer.createMBean(socketAcceptor);
 
-        LOGGER.info("***************************************************");
-        LOGGER.info("* MINA NIO Acceptor Listening socket in port:"+socketAcceptor.getDefaultLocalAddress().getPort()+" *");
-        LOGGER.info("***************************************************");
+        String command = args[0];
+        if(StringUtils.isNotBlank(command)){
+            NioSocketAcceptor socketAcceptor = (NioSocketAcceptor)applicationContext.getBean("ioAcceptor");
+            if(command.equals("start")){
+                try {
+                    socketAcceptor.bind();
+                    MainServer.createMBean(socketAcceptor);
+                    LOGGER.info("***************************************************");
+                    LOGGER.info("* MINA NIO Acceptor Listening socket in port:"+socketAcceptor.getDefaultLocalAddress().getPort()+" *");
+                    LOGGER.info("***************************************************");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }else if(command.equals("stop")){
+                socketAcceptor.unbind();
+                applicationContext.close();
+            }
+        }
 
 
     }
+
+    /**
+     * 创建jmx管理
+     * @param nioSocketAcceptor
+     */
     private static void createMBean(NioSocketAcceptor nioSocketAcceptor){
 
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -91,6 +120,7 @@ public class MainServer {
             e.printStackTrace();
         }
     }
+
     private static IoHandler createIoHandlerUseStateMachine() {
         StateMachine sm = StateMachineFactory.getInstance(
                 IoHandlerTransition.class).create(ServerHandler.NOT_CONNECTED,
