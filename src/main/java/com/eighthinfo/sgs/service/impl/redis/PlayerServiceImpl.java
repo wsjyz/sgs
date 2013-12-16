@@ -57,50 +57,50 @@ public class PlayerServiceImpl implements PlayerService {
         }
         //验证是否已在房间内
         String userRoomInfo = redisTemplate.boundValueOps(userId).get();
-        if(org.apache.commons.lang3.StringUtils.isNotBlank(userRoomInfo)){
-            LOGGER.warn("the user "+userId+" is already in room");
-            return null;
-        }
-        roomPlayer.setUserId(userId);
-        roomPlayer.setNickName(nickName);
-        roomPlayer.setAwardId(awardId);
-        roomPlayer.setMale(male);
-
-        //查找应该进入的房间,根据奖品ID来查找，该类奖品下房间的情况
-        Set<ZSetOperations.TypedTuple<String>> set = redisTemplate.boundZSetOps(awardId).reverseRangeByScoreWithScores(0,4);
-
-        AtomicBoolean hasRoom = new AtomicBoolean(false);
-
-        if(set.isEmpty()){ //第一个人、没有房间
-            hasRoom.set(false);
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(userRoomInfo)){ //已经在房间
+            roomPlayer = JSON.parseObject(userRoomInfo,RoomPlayer.class);
         }else{
-            Iterator<ZSetOperations.TypedTuple<String>> itor = set.iterator();
-            if(itor.hasNext()){//有人数未满的房间
-                ZSetOperations.TypedTuple<String> typedTuple = itor.next();
+            roomPlayer.setUserId(userId);
+            roomPlayer.setNickName(nickName);
+            roomPlayer.setAwardId(awardId);
+            roomPlayer.setMale(male);
 
-                String roomId = typedTuple.getValue();
-                roomPlayer.setRoomId(roomId);
-                AtomicInteger seatNo = new AtomicInteger(typedTuple.getScore().intValue());
-                roomPlayer.setSeatNo(seatNo.incrementAndGet());
-                redisTemplate.boundZSetOps(awardId).incrementScore(roomPlayer.getRoomId(), 1);
-                hasRoom.set(true);
+            //查找应该进入的房间,根据奖品ID来查找，该类奖品下房间的情况
+            Set<ZSetOperations.TypedTuple<String>> set
+                    = redisTemplate.boundZSetOps(awardId).reverseRangeByScoreWithScores(0,4);
 
+            AtomicBoolean hasRoom = new AtomicBoolean(false);
+            if(set.isEmpty()){ //第一个人、没有房间
+                hasRoom.set(false);
+            }else{
+                Iterator<ZSetOperations.TypedTuple<String>> itor = set.iterator();
+                if(itor.hasNext()){//有人数未满的房间
+
+                    ZSetOperations.TypedTuple<String> typedTuple = itor.next();
+                    String roomId = typedTuple.getValue();
+                    roomPlayer.setRoomId(roomId);
+                    AtomicInteger seatNo = new AtomicInteger(typedTuple.getScore().intValue());
+                    roomPlayer.setSeatNo(seatNo.incrementAndGet());
+                    redisTemplate.boundZSetOps(awardId).incrementScore(roomPlayer.getRoomId(), 1);
+                    hasRoom.set(true);
+
+                }
             }
+            //新建一个房间
+            if(!hasRoom.get()){
+                String roomId = StringUtils.genShortPK();
+                roomPlayer.setRoomId(roomId);
+                roomPlayer.setSeatNo(0);
+                redisTemplate.boundZSetOps(awardId).add(roomId, 0);
+            }
+            String roomPlayerStr = JSON.toJSONString(roomPlayer);
+            redisTemplate.boundListOps(roomPlayer.getRoomId()).rightPush(roomPlayerStr);
+            redisTemplate.boundValueOps(userId).set(roomPlayerStr);
         }
-        //新建一个房间
-        if(!hasRoom.get()){
-            String roomId = StringUtils.genShortPK();
-            roomPlayer.setRoomId(roomId);
-            roomPlayer.setSeatNo(0);
-            redisTemplate.boundZSetOps(awardId).add(roomId, 0);
-        }
-        String roomPlayerStr = JSON.toJSONString(roomPlayer);
-        redisTemplate.boundListOps(roomPlayer.getRoomId()).rightPush(roomPlayerStr);
-        redisTemplate.boundValueOps(userId).set(roomPlayerStr);
+
 
 
         List<String> stringList = redisTemplate.boundListOps(roomPlayer.getRoomId()).range(0,5);
-
         List<RoomPlayer> playerList =  parseStringToObject(stringList);
 
         //通知当前玩家，包含自己的座位号和其他人的信息
@@ -110,7 +110,6 @@ public class PlayerServiceImpl implements PlayerService {
         commonMessage.setCallMethodParameters(playerList);
 
         //广播当前玩家信息
-
         broadcastToOther(roomPlayer.getUserId(),playerList,
                 Constants.ON_OTHER_USER_COME_IN,playerList);
 
