@@ -74,23 +74,16 @@ public class MainServer {
     }
     public static void main(String[] args){
 
-        String command = args[0];
-        if(StringUtils.isNotBlank(command)){
-            NioSocketAcceptor socketAcceptor = (NioSocketAcceptor)applicationContext.getBean("ioAcceptor");
-            if(command.equals("start")){
-                try {
-                    socketAcceptor.bind();
-                    MainServer.createMBean(socketAcceptor);
-                    LOGGER.info("***************************************************");
-                    LOGGER.info("* MINA NIO Acceptor Listening socket in port:"+socketAcceptor.getDefaultLocalAddress().getPort()+" *");
-                    LOGGER.info("***************************************************");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }else if(command.equals("stop")){
-                socketAcceptor.unbind();
-                applicationContext.close();
-            }
+        NioSocketAcceptor socketAcceptor = (NioSocketAcceptor) applicationContext.getBean("ioAcceptor");
+
+        try {
+            socketAcceptor.bind();
+            MainServer.createMBean(socketAcceptor);
+            LOGGER.info("***************************************************");
+            LOGGER.info("* MINA NIO Acceptor Listening socket in port:" + socketAcceptor.getDefaultLocalAddress().getPort() + " *");
+            LOGGER.info("***************************************************");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
 

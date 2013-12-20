@@ -65,9 +65,8 @@ public class CommonServerHandler extends IoHandlerAdapter{
 
         clock.stop();
         LOGGER.info("invoke method " + methodName + " take " + clock.getTime() + " ms");
-
         if(result != null){
-            if(!session.isConnected()){
+            if(session.isConnected()){
                 session.write(result);
             }
         }

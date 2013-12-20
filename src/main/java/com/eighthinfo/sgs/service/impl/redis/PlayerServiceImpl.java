@@ -110,8 +110,8 @@ public class PlayerServiceImpl implements PlayerService {
         commonMessage.setCallMethodParameters(playerList);
 
         //广播当前玩家信息
-        broadcastToOther(roomPlayer.getUserId(),playerList,
-                Constants.ON_OTHER_USER_COME_IN,playerList);
+        broadcastToOther(roomPlayer.getUserId(), playerList,
+                Constants.ON_OTHER_USER_COME_IN, playerList);
 
         return commonMessage;
     }
@@ -232,6 +232,7 @@ public class PlayerServiceImpl implements PlayerService {
         broadcastMessage.setReceivers(userIds);
         broadcastMessage.setCallMethod(callBack);
         broadcastMessage.setCallMethodParameters(parameters);
+
 
         BroadcastHandler.broadcast(broadcastMessage);
     }

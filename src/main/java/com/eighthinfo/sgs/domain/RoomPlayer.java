@@ -6,7 +6,7 @@ package com.eighthinfo.sgs.domain;
  * Date: 13-11-18
  * Time: 下午9:48
  */
-public class RoomPlayer {
+public class RoomPlayer extends AbstractModel{
 
     private String id;
 
