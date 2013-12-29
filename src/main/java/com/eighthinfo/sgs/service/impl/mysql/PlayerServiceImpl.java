@@ -30,8 +30,6 @@ public class PlayerServiceImpl implements PlayerService{
     private static final Logger LOGGER = LoggerFactory
             .getLogger(PlayerServiceImpl.class);
 
-    @Autowired
-    @Qualifier("playerDAO")
     private PlayerDAO playerDAO;
 
     @Override
@@ -99,8 +97,7 @@ public class PlayerServiceImpl implements PlayerService{
         return null;
     }
 
-    @Override
-    public CommonMessage answerQuestion(String args) {
+     public CommonMessage answerQuestion(String args) {
 
         PlayerAnswer playerAnswer = JSON.parseObject(args,PlayerAnswer.class);
 
