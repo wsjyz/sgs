@@ -8,6 +8,7 @@ import com.eighthinfo.sgs.domain.RoomPlayer;
 import com.eighthinfo.sgs.message.BroadcastHandler;
 import com.eighthinfo.sgs.message.BroadcastMessage;
 import com.eighthinfo.sgs.message.CommonMessage;
+import com.eighthinfo.sgs.service.BaseService;
 import com.eighthinfo.sgs.service.PlayerService;
 import com.eighthinfo.sgs.utils.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -30,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * User: dam
  * Date: 13-11-26
  */
-public class PlayerServiceImpl implements PlayerService {
+public class PlayerServiceImpl extends BaseService implements PlayerService {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(PlayerServiceImpl.class);
@@ -184,56 +185,6 @@ public class PlayerServiceImpl implements PlayerService {
         return null;
     }
 
-    @Override
-    public CommonMessage answerQuestion(String args) {
-
-        PlayerAnswer playerAnswer = JSON.parseObject(args,PlayerAnswer.class);
-
-        List<String> stringList = redisTemplate.boundListOps(playerAnswer.getRoomId()).range(0,5);
-
-        List<RoomPlayer> playerList =  parseStringToObject(stringList);
-
-        broadcastToOther(playerAnswer.getUserId(),playerList,
-                Constants.ON_ANSWER_COMPLETE,playerAnswer);
-
-        return null;
-    }
-
-    private List<RoomPlayer> parseStringToObject(List<String> stringList){
-
-        return (List<RoomPlayer>)CollectionUtils.collect(stringList,new Transformer() {
-            @Override
-            public Object transform(Object o) {
-                RoomPlayer roomPlayer = JSON.parseObject(o.toString(),RoomPlayer.class);
-                return roomPlayer;
-            }
-        });
-    }
-    private void broadcastToOther(final String sender,List<RoomPlayer> receivers,String callBack,Object parameters){
-
-        //去掉要排除的sender
-        receivers = (List<RoomPlayer>)CollectionUtils.select(receivers,new Predicate() {
-            @Override
-            public boolean evaluate(Object o) {
-                RoomPlayer roomPlayer = (RoomPlayer)o;
-                return !roomPlayer.getUserId().equals(sender);
-            }
-        });
-        //把要用的属性拿出来放到新的List中
-        List<String> userIds = (List<String>)CollectionUtils.collect(receivers,new Transformer() {
-            @Override
-            public Object transform(Object o) {
-                RoomPlayer roomPlayer = (RoomPlayer)o;
-                return roomPlayer.getUserId();
-            }
-        });
-        //广播信息
-        BroadcastMessage broadcastMessage = new BroadcastMessage();
-        broadcastMessage.setReceivers(userIds);
-        broadcastMessage.setCallMethod(callBack);
-        broadcastMessage.setCallMethodParameters(parameters);
 
 
-        BroadcastHandler.broadcast(broadcastMessage);
-    }
 }

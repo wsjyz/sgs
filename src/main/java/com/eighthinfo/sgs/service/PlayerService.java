@@ -30,11 +30,6 @@ public interface PlayerService {
      */
     CommonMessage leftRoom(String args);
 
-    /**
-     * 回答问题
-     * @param args
-     * @return
-     */
-    CommonMessage answerQuestion(String args);
+
 
 }

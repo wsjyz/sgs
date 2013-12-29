@@ -15,6 +15,10 @@ public interface Constants {
 
     char MESSAGE_NAME_PAD_CHAR = ' ';
 
+    String SCORE_OPTION_ANSWER_RIGHT= "scoreOptionAnswerRight";
+
+    String SCORE_OPTION_WIN_GAME = "scoreOptionWinGame";
+
     String ON_ENTER_ROOM = "onEnterRoom";
 
     String ON_OTHER_USER_COME_IN = "onOtherUserComeIn";
