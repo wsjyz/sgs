@@ -52,9 +52,9 @@ public class CommonServerHandler extends IoHandlerAdapter{
         JSONObject nickNameJson = JSON.parseObject(messageRequest.getCallMethodParameters().toString());
         clock.stop();
         LOGGER.info("parse json take "+clock.getTime()+" ms");
-        String userId = (String)nickNameJson.get("userId");
-        session.setAttribute("userId",userId);
-        BroadcastHandler.addSession(userId,session);
+        String playerId = (String)nickNameJson.get("playerId");
+        session.setAttribute("playerId",playerId);
+        BroadcastHandler.addSession(playerId,session);
         clock.reset();
         clock.start();
         CommonMessage result = (CommonMessage) ClassUtils.invokeMethod(ac.getBean(clazzName),
@@ -92,10 +92,10 @@ public class CommonServerHandler extends IoHandlerAdapter{
     public void sessionClosed(IoSession session) throws Exception {
         super.sessionClosed(session);
         PlayerService playerService = (PlayerService)ac.getBean("playerService");
-        String userId = (String)session.getAttribute("userId");
+        String playerId = (String)session.getAttribute("playerId");
 
-        if(org.apache.commons.lang3.StringUtils.isNotBlank(userId)){
-            playerService.leftRoom("{\"userId\":\""+userId+"\"}");
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(playerId)){
+            playerService.leftRoom("{\"playerId\":\""+playerId+"\"}");
         }
         HallService hallService = (HallService)ac.getBean("hallService");
         hallService.increaseHallUserCount(minaHost,minaPort,false);

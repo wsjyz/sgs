@@ -11,4 +11,6 @@
     <bean id="playerService" class="com.eighthinfo.sgs.service.impl.redis.PlayerServiceImpl"/>
 
     <bean id="hallService" class="com.eighthinfo.sgs.service.impl.redis.HallServiceImpl"/>
+
+    <bean id="answerQuestionService" class="com.eighthinfo.sgs.service.impl.redis.AnswerQuestionServiceImpl"/>
 </beans>

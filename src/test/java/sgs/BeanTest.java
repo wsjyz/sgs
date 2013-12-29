@@ -1,17 +1,8 @@
 package sgs;
 
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.eighthinfo.sgs.domain.RoomPlayer;
-import com.eighthinfo.sgs.utils.ClassUtils;
-import com.eighthinfo.sgs.utils.JSONUtils;
 import com.eighthinfo.sgs.utils.StringUtils;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import java.io.UnsupportedEncodingException;
-import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,7 +25,7 @@ public class BeanTest {
         RoomPlayer roomPlayer2 = new RoomPlayer();
         roomPlayer2.setNickName("2");
         roomPlayer2.setSeatNo(2);
-        roomPlayer2.setUserId(StringUtils.genShortPK());
+        roomPlayer2.setPlayerId(StringUtils.genShortPK());
         roomPlayer2.setAwardId(StringUtils.genShortPK());
         roomPlayer2.setRoomId(StringUtils.genShortPK());
         roomPlayer2.setMale(1);

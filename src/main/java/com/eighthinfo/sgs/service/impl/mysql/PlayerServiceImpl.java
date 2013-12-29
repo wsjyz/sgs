@@ -16,8 +16,6 @@ import org.apache.commons.collections.Transformer;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +51,7 @@ public class PlayerServiceImpl implements PlayerService{
 
         //通知当前玩家，包含自己的座位号和其他人的信息
         CommonMessage commonMessage = new CommonMessage();
-        commonMessage.setReceiver(roomPlayer.getUserId());
+        commonMessage.setReceiver(roomPlayer.getPlayerId());
         commonMessage.setCallMethod(Constants.ON_ENTER_ROOM);
         commonMessage.setCallMethodParameters(playerList);
 
@@ -61,7 +59,7 @@ public class PlayerServiceImpl implements PlayerService{
         clock.reset();
         clock.start();
 
-        broadcastToOther(roomPlayer.getUserId(),playerList,
+        broadcastToOther(roomPlayer.getPlayerId(),playerList,
                 Constants.ON_OTHER_USER_COME_IN,playerList);
         clock.stop();
         LOGGER.info("enterRoom.BroadcastHandler.broadcast take "+clock.getTime());
@@ -91,7 +89,7 @@ public class PlayerServiceImpl implements PlayerService{
 
         List<RoomPlayer> roomPlayerList = playerDAO.findRoomPlayer(roomPlayer.getRoomId());
 
-        broadcastToOther(roomPlayer.getUserId(),roomPlayerList,
+        broadcastToOther(roomPlayer.getPlayerId(),roomPlayerList,
                 Constants.ON_OTHER_USER_LEFT,roomPlayer);
 
         return null;
@@ -103,7 +101,7 @@ public class PlayerServiceImpl implements PlayerService{
 
         List<RoomPlayer> roomPlayerList = playerDAO.findRoomPlayer(playerAnswer.getRoomId());
 
-        broadcastToOther(playerAnswer.getUserId(),roomPlayerList,
+        broadcastToOther(playerAnswer.getPlayerId(),roomPlayerList,
                 Constants.ON_ANSWER_COMPLETE,playerAnswer);
 
         return null;
@@ -116,7 +114,7 @@ public class PlayerServiceImpl implements PlayerService{
             @Override
             public boolean evaluate(Object o) {
                 RoomPlayer roomPlayer = (RoomPlayer)o;
-                return !roomPlayer.getUserId().equals(sender);
+                return !roomPlayer.getPlayerId().equals(sender);
             }
         });
         //把要用的属性拿出来放到新的List中
@@ -124,7 +122,7 @@ public class PlayerServiceImpl implements PlayerService{
             @Override
             public Object transform(Object o) {
                 RoomPlayer roomPlayer = (RoomPlayer)o;
-                return roomPlayer.getUserId();
+                return roomPlayer.getPlayerId();
             }
         });
         //广播信息

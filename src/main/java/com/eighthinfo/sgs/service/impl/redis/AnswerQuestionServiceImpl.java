@@ -8,7 +8,6 @@ import com.eighthinfo.sgs.domain.RoomPlayer;
 import com.eighthinfo.sgs.message.CommonMessage;
 import com.eighthinfo.sgs.service.AnswerQuestionService;
 import com.eighthinfo.sgs.service.BaseService;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ public class AnswerQuestionServiceImpl extends BaseService implements AnswerQues
         if(playerAnswer.getRight() == 1){
             //添加得分
             //TODO the key playerExp should be conf
-            redisTemplate.boundListOps("playerExp").leftPush(playerAnswer.getUserId()
+            redisTemplate.boundListOps("playerExp").leftPush(playerAnswer.getPlayerId()
                     +"#"+ Constants.SCORE_OPTION_ANSWER_RIGHT);
 
         }
@@ -47,7 +46,7 @@ public class AnswerQuestionServiceImpl extends BaseService implements AnswerQues
         playerAnswer.setRoomId(null);
         List<RoomPlayer> playerList =  parseStringToObject(stringList);
 
-        broadcastToOther(playerAnswer.getUserId(),playerList,
+        broadcastToOther(playerAnswer.getPlayerId(),playerList,
                 Constants.ON_ANSWER_COMPLETE,playerAnswer);
 
         return null;
@@ -57,11 +56,11 @@ public class AnswerQuestionServiceImpl extends BaseService implements AnswerQues
     public CommonMessage winGame(String args) {
 
         JSONObject jsonObject = JSON.parseObject(args);
-        String userId = jsonObject.getString("userId");
+        String playerId = jsonObject.getString("playerId");
 
         //添加得分
         //TODO the key playerExp should be conf
-        redisTemplate.boundListOps("playerExp").leftPush(userId
+        redisTemplate.boundListOps("playerExp").leftPush(playerId
                 +"#"+ Constants.SCORE_OPTION_WIN_GAME);
 
         return null;

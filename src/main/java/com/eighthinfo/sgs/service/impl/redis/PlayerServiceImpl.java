@@ -3,17 +3,12 @@ package com.eighthinfo.sgs.service.impl.redis;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.eighthinfo.sgs.Constants;
-import com.eighthinfo.sgs.domain.PlayerAnswer;
 import com.eighthinfo.sgs.domain.RoomPlayer;
 import com.eighthinfo.sgs.message.BroadcastHandler;
-import com.eighthinfo.sgs.message.BroadcastMessage;
 import com.eighthinfo.sgs.message.CommonMessage;
 import com.eighthinfo.sgs.service.BaseService;
 import com.eighthinfo.sgs.service.PlayerService;
 import com.eighthinfo.sgs.utils.StringUtils;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.commons.collections.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,22 +41,22 @@ public class PlayerServiceImpl extends BaseService implements PlayerService {
         //RoomPlayer roomPlayer = JSON.parseObject(args, RoomPlayer.class);
         RoomPlayer roomPlayer = new RoomPlayer();
         JSONObject jsonObject = JSON.parseObject(args);
-        String userId = jsonObject.getString("userId");
+        String playerId = jsonObject.getString("playerId");
         String nickName = jsonObject.getString("nickName");
         String awardId = jsonObject.getString("awardId");
         int male = jsonObject.getIntValue("male");
 
-        if(org.apache.commons.lang3.StringUtils.isBlank(userId)
+        if(org.apache.commons.lang3.StringUtils.isBlank(playerId)
                 || org.apache.commons.lang3.StringUtils.isBlank(nickName)){
-            LOGGER.warn("userId and nickName can't be empty!");
+            LOGGER.warn("playerId and nickName can't be empty!");
              return null;
         }
         //验证是否已在房间内
-        String userRoomInfo = redisTemplate.boundValueOps(userId).get();
+        String userRoomInfo = redisTemplate.boundValueOps(playerId).get();
         if(org.apache.commons.lang3.StringUtils.isNotBlank(userRoomInfo)){ //已经在房间
             roomPlayer = JSON.parseObject(userRoomInfo,RoomPlayer.class);
         }else{
-            roomPlayer.setUserId(userId);
+            roomPlayer.setPlayerId(playerId);
             roomPlayer.setNickName(nickName);
             roomPlayer.setAwardId(awardId);
             roomPlayer.setMale(male);
@@ -96,7 +91,7 @@ public class PlayerServiceImpl extends BaseService implements PlayerService {
             }
             String roomPlayerStr = JSON.toJSONString(roomPlayer);
             redisTemplate.boundListOps(roomPlayer.getRoomId()).rightPush(roomPlayerStr);
-            redisTemplate.boundValueOps(userId).set(roomPlayerStr);
+            redisTemplate.boundValueOps(playerId).set(roomPlayerStr);
         }
 
 
@@ -106,12 +101,12 @@ public class PlayerServiceImpl extends BaseService implements PlayerService {
 
         //通知当前玩家，包含自己的座位号和其他人的信息
         CommonMessage commonMessage = new CommonMessage();
-        commonMessage.setReceiver(roomPlayer.getUserId());
+        commonMessage.setReceiver(roomPlayer.getPlayerId());
         commonMessage.setCallMethod(Constants.ON_ENTER_ROOM);
         commonMessage.setCallMethodParameters(playerList);
 
         //广播当前玩家信息
-        broadcastToOther(roomPlayer.getUserId(), playerList,
+        broadcastToOther(roomPlayer.getPlayerId(), playerList,
                 Constants.ON_OTHER_USER_COME_IN, playerList);
 
         return commonMessage;
@@ -121,18 +116,18 @@ public class PlayerServiceImpl extends BaseService implements PlayerService {
     public CommonMessage playerReady(String args) {
 
         JSONObject jsonObject = JSON.parseObject(args);
-        if(jsonObject.get("roomId") == null || jsonObject.get("userId") == null){
+        if(jsonObject.get("roomId") == null || jsonObject.get("playerId") == null){
             return null;
         }
 
         String roomId = jsonObject.get("roomId").toString();
-        String userId = jsonObject.get("userId").toString();
+        String playerId = jsonObject.get("playerId").toString();
 
         List<String> stringList = redisTemplate.boundListOps(roomId).range(0,5);
 
         List<RoomPlayer> playerList =  parseStringToObject(stringList);
 
-        broadcastToOther(userId,playerList,Constants.ON_PLAYER_READY,"{\"userId\":\""+userId+"\"}");
+        broadcastToOther(playerId,playerList,Constants.ON_PLAYER_READY,"{\"playerId\":\""+playerId+"\"}");
 
         return null;
     }
@@ -140,17 +135,17 @@ public class PlayerServiceImpl extends BaseService implements PlayerService {
     @Override
     public CommonMessage leftRoom(String args) {
 
-        String userId = JSON.parseObject(args).getString("userId");
+        String playerId = JSON.parseObject(args).getString("playerId");
 
-        if(org.apache.commons.lang3.StringUtils.isBlank(userId)){
-            LOGGER.warn("userId can't be empty!");
+        if(org.apache.commons.lang3.StringUtils.isBlank(playerId)){
+            LOGGER.warn("playerId can't be empty!");
             return null;
         }
-        if(!redisTemplate.hasKey(userId)){
-            LOGGER.warn("can't find userId:"+userId);
+        if(!redisTemplate.hasKey(playerId)){
+            LOGGER.warn("can't find playerId:"+playerId);
             return null;
         }
-        RoomPlayer roomPlayer = JSON.parseObject(redisTemplate.boundValueOps(userId).get(),RoomPlayer.class);
+        RoomPlayer roomPlayer = JSON.parseObject(redisTemplate.boundValueOps(playerId).get(),RoomPlayer.class);
 
 
         //从房间用户列表中删除当前用户
@@ -172,16 +167,16 @@ public class PlayerServiceImpl extends BaseService implements PlayerService {
 
                 List<RoomPlayer> playerList =  parseStringToObject(stringList);
 
-                broadcastToOther(roomPlayer.getUserId(),playerList,
+                broadcastToOther(roomPlayer.getPlayerId(),playerList,
                         Constants.ON_OTHER_USER_LEFT,roomPlayer);
             }
         }
 
 
         //删除当前用户信息
-        redisTemplate.delete(userId);
+        redisTemplate.delete(playerId);
         //从缓存中删除
-        BroadcastHandler.removeSession(userId);
+        BroadcastHandler.removeSession(playerId);
         return null;
     }
 

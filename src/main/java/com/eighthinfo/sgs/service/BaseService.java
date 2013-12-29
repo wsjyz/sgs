@@ -22,7 +22,7 @@ public class BaseService {
             @Override
             public boolean evaluate(Object o) {
                 RoomPlayer roomPlayer = (RoomPlayer) o;
-                return !roomPlayer.getUserId().equals(sender);
+                return !roomPlayer.getPlayerId().equals(sender);
             }
         });
         //把要用的属性拿出来放到新的List中
@@ -30,7 +30,7 @@ public class BaseService {
             @Override
             public Object transform(Object o) {
                 RoomPlayer roomPlayer = (RoomPlayer)o;
-                return roomPlayer.getUserId();
+                return roomPlayer.getPlayerId();
             }
         });
         //广播信息

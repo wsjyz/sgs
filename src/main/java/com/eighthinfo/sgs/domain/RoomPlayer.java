@@ -10,7 +10,7 @@ public class RoomPlayer extends AbstractModel{
 
     private String id;
 
-    private String userId;
+    private String playerId;
 
     private String roomId;
 
@@ -30,12 +30,12 @@ public class RoomPlayer extends AbstractModel{
         this.awardId = awardId;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getPlayerId() {
+        return playerId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setPlayerId(String playerId) {
+        this.playerId = playerId;
     }
 
     public int getMale() {

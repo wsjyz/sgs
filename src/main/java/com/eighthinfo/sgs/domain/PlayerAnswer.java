@@ -7,7 +7,7 @@ package com.eighthinfo.sgs.domain;
  */
 public class PlayerAnswer {
 
-    private String userId;
+    private String playerId;
 
     private int topIndex;
 
@@ -27,12 +27,12 @@ public class PlayerAnswer {
         this.roomId = roomId;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getPlayerId() {
+        return playerId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setPlayerId(String playerId) {
+        this.playerId = playerId;
     }
 
     public int getTopIndex() {

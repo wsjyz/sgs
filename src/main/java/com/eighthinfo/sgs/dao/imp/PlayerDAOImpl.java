@@ -9,9 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,7 +25,7 @@ public class PlayerDAOImpl extends BaseDAO implements PlayerDAO {
     @Override
     public int savePlayerRoom(RoomPlayer roomPlayer) {
 
-        String userId = roomPlayer.getUserId();
+        String userId = roomPlayer.getPlayerId();
         String roomId = roomPlayer.getRoomId();
 
         if(findRoomPlayerCounts(userId,roomId) > 0){
@@ -71,7 +69,7 @@ public class PlayerDAOImpl extends BaseDAO implements PlayerDAO {
                 roomPlayer.setNickName(resultSet.getString("nick_name"));
                 roomPlayer.setMale(resultSet.getInt("male"));
                 roomPlayer.setSeatNo(resultSet.getInt("seat_no"));
-                roomPlayer.setUserId(resultSet.getString("user_id"));
+                roomPlayer.setPlayerId(resultSet.getString("user_id"));
                 roomPlayer.setRoomId(resultSet.getString("room_id"));
                 return roomPlayer;
             }
@@ -82,7 +80,7 @@ public class PlayerDAOImpl extends BaseDAO implements PlayerDAO {
     @Override
     public void removePlayerRoom(RoomPlayer roomPlayer) {
 
-        String userId = roomPlayer.getUserId();
+        String userId = roomPlayer.getPlayerId();
         String roomId = roomPlayer.getRoomId();
 
         if(org.apache.commons.lang3.StringUtils.isNotBlank(userId)){
