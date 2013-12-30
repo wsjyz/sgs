@@ -6,7 +6,7 @@ package com.eighthinfo.sgs.domain;
  */
 public class Player {
 
-    private String userId;
+    private String playerId;
 
     private String userName;
 
@@ -16,12 +16,12 @@ public class Player {
 
     private String phone;
 
-    public String getUserId() {
-        return userId;
+    public String getPlayerId() {
+        return playerId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setPlayerId(String playerId) {
+        this.playerId = playerId;
     }
 
     public String getUserName() {
