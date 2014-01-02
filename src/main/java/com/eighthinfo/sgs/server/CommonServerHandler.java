@@ -8,6 +8,7 @@ import com.eighthinfo.sgs.service.HallService;
 import com.eighthinfo.sgs.service.PlayerService;
 import com.eighthinfo.sgs.service.impl.redis.HallServiceImpl;
 import com.eighthinfo.sgs.utils.ClassUtils;
+import com.eighthinfo.sgs.utils.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
@@ -15,13 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.data.redis.core.RedisTemplate;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -105,7 +100,9 @@ public class CommonServerHandler extends IoHandlerAdapter{
      * 向缓存中注册当前HALL（sgs服务实例）
      */
     private void registHall(){
-        readMinaPro();
+        Properties properties = StringUtils.readProperties("mina.properties");
+        minaPort = Integer.parseInt(properties.getProperty("mina.port"));
+        minaHost = properties.getProperty("mina.host");
         HallService hallService = (HallService)ac.getBean("hallService");
         hallService.registHall(minaHost,minaPort);
     }
@@ -118,17 +115,5 @@ public class CommonServerHandler extends IoHandlerAdapter{
         hallService.cancelHall(minaHost,minaPort);
     }
 
-    private void readMinaPro(){
-        //获取实例地址和端口
-        String minaConfFilePath = System.getProperty("APP_HOME")+ File.separator+"mina.properties";
-        Resource resource = new FileSystemResource(minaConfFilePath);
-        Properties props = null;
-        try {
-            props = PropertiesLoaderUtils.loadProperties(resource);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        minaPort = Integer.parseInt(props.getProperty("mina.port"));
-        minaHost = props.getProperty("mina.host");
-    }
+
 }

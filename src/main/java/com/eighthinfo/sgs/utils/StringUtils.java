@@ -1,6 +1,13 @@
 package com.eighthinfo.sgs.utils;
 
 
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -25,5 +32,17 @@ public class StringUtils {
             sb.append(strs[x % 0x3E]);
         }
         return sb.toString();
+    }
+    public static Properties readProperties(String propertiesFileName){
+        //获取实例地址和端口
+        String propertiesFilePath = System.getProperty("APP_HOME")+ File.separator+propertiesFileName;
+        Resource resource = new FileSystemResource(propertiesFilePath);
+        Properties props = null;
+        try {
+            props = PropertiesLoaderUtils.loadProperties(resource);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return props;
     }
 }

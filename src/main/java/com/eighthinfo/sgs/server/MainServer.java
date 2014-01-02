@@ -13,6 +13,7 @@ import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.executor.ExecutorFilter;
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.integration.jmx.IoServiceMBean;
 import org.apache.mina.statemachine.StateMachine;
@@ -41,6 +42,7 @@ import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -56,37 +58,37 @@ public class MainServer {
 
     private NioSocketAcceptor acceptor;
 
-    static ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("server-run.xml");
-
+    private String host;
     private int port;
 
-    public MainServer(int port) {
+    public MainServer(String host,int port) {
         this.port = port;
-        acceptor = new NioSocketAcceptor();
+        this.host = host;
+        acceptor = new NioSocketAcceptor(Runtime.getRuntime().availableProcessors() + 1);
         acceptor.getFilterChain().addLast("logger", new LoggingFilter());
+        acceptor.getFilterChain().addLast("threadPool",new ExecutorFilter(Executors.newCachedThreadPool()));
         acceptor.getFilterChain().addLast("protocol",
                 new ProtocolCodecFilter(new SgsCodecFactory()));
         acceptor.setHandler(new CommonServerHandler());
     }
 
     public void start() throws IOException {
-        acceptor.bind(new InetSocketAddress(port));
+        acceptor.bind(new InetSocketAddress(host,port));
+        createMBean(acceptor);
     }
     public static void main(String[] args){
-
-        NioSocketAcceptor socketAcceptor = (NioSocketAcceptor) applicationContext.getBean("ioAcceptor");
-
+        Properties properties = com.eighthinfo.sgs.utils.StringUtils.readProperties("mina.properties");
+        int minaPort = Integer.parseInt(properties.getProperty("mina.port"));
+        String minaHost = properties.getProperty("mina.host");
+        MainServer server = new MainServer(minaHost,minaPort);
         try {
-            socketAcceptor.bind();
-            MainServer.createMBean(socketAcceptor);
-            LOGGER.info("***************************************************");
-            LOGGER.info("* MINA NIO Acceptor Listening socket in port:" + socketAcceptor.getDefaultLocalAddress().getPort() + " *");
-            LOGGER.info("***************************************************");
+            server.start();
+            LOGGER.info("***********************************************************");
+            LOGGER.info("* MINA NIO Acceptor Listening socket on:"+minaHost+":"+minaPort+" *");
+            LOGGER.info("***********************************************************");
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     /**
