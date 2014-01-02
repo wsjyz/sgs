@@ -107,7 +107,7 @@ public class PlayerServiceImpl extends BaseService implements PlayerService {
 
         //广播当前玩家信息
         broadcastToOther(roomPlayer.getPlayerId(), playerList,
-                Constants.ON_OTHER_USER_COME_IN, playerList);
+                Constants.ON_OTHER_USER_COME_IN, roomPlayer);
 
         return commonMessage;
     }
