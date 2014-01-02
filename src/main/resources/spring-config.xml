@@ -12,5 +12,5 @@
 
     <bean id="hallService" class="com.eighthinfo.sgs.service.impl.redis.HallServiceImpl"/>
 
-    <bean id="answerQuestionService" class="com.eighthinfo.sgs.service.impl.redis.AnswerQuestionServiceImpl"/>
+    <bean id="answerService" class="com.eighthinfo.sgs.service.impl.redis.AnswerQuestionServiceImpl"/>
 </beans>

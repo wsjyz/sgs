@@ -49,7 +49,12 @@ public class AnswerQuestionServiceImpl extends BaseService implements AnswerQues
         broadcastToOther(playerAnswer.getPlayerId(),playerList,
                 Constants.ON_ANSWER_COMPLETE,playerAnswer);
 
-        return null;
+        //给自己也发一个，客户端需要做进入下一题的依据
+        CommonMessage commonMessage = new CommonMessage();
+        commonMessage.setReceiver(playerAnswer.getPlayerId());
+        commonMessage.setCallMethod(Constants.ON_ANSWER_COMPLETE);
+        commonMessage.setCallMethodParameters(playerAnswer);
+        return commonMessage;
     }
 
     @Override
