@@ -93,27 +93,7 @@ public class CommonServerHandler extends IoHandlerAdapter{
             playerService.leftRoom("{\"playerId\":\""+playerId+"\"}");
         }
         HallService hallService = (HallService)ac.getBean("hallService");
-        hallService.increaseHallUserCount(minaHost,minaPort,false);
+        hallService.increaseHallUserCount(minaHost, minaPort, false);
     }
-
-    /**
-     * 向缓存中注册当前HALL（sgs服务实例）
-     */
-    private void registHall(){
-        Properties properties = StringUtils.readProperties("mina.properties");
-        minaPort = Integer.parseInt(properties.getProperty("mina.port"));
-        minaHost = properties.getProperty("mina.host");
-        HallService hallService = (HallService)ac.getBean("hallService");
-        hallService.registHall(minaHost,minaPort);
-    }
-
-    /**
-     * 注销服务
-     */
-    private void cancelHall(){
-        HallService hallService = (HallService)ac.getBean("hallService");
-        hallService.cancelHall(minaHost,minaPort);
-    }
-
 
 }
