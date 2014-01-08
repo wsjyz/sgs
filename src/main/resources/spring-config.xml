@@ -10,7 +10,7 @@
 
     <bean id="playerService" class="com.eighthinfo.sgs.service.impl.redis.PlayerServiceImpl"/>
 
-    <bean id="hallService" class="com.eighthinfo.sgs.service.impl.redis.HallServiceImpl"/>
+    <bean id="hallService" class="com.eighthinfo.sgs.service.impl.redis.HallServiceImpl" init-method="init"/>
 
     <bean id="answerService" class="com.eighthinfo.sgs.service.impl.redis.AnswerQuestionServiceImpl"/>
 </beans>
