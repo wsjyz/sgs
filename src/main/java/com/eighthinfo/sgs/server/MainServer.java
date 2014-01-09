@@ -69,7 +69,7 @@ public class MainServer {
         acceptor.getFilterChain().addLast("threadPool",new ExecutorFilter(Executors.newCachedThreadPool()));
         acceptor.getFilterChain().addLast("protocol",
                 new ProtocolCodecFilter(new SgsCodecFactory()));
-        acceptor.setHandler(new CommonServerHandler());
+        acceptor.setHandler(new CommonServerHandler(host,port));
     }
 
     public void start() throws IOException {

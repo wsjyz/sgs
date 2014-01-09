@@ -6,9 +6,7 @@ import com.eighthinfo.sgs.message.BroadcastHandler;
 import com.eighthinfo.sgs.message.CommonMessage;
 import com.eighthinfo.sgs.service.HallService;
 import com.eighthinfo.sgs.service.PlayerService;
-import com.eighthinfo.sgs.service.impl.redis.HallServiceImpl;
 import com.eighthinfo.sgs.utils.ClassUtils;
-import com.eighthinfo.sgs.utils.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
@@ -17,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.util.Properties;
 
 /**
  * User: dam
@@ -33,6 +30,10 @@ public class CommonServerHandler extends IoHandlerAdapter{
     String minaHost = "";
     int minaPort = 0;
 
+    public CommonServerHandler(String host,int port){
+        this.minaPort = port;
+        this.minaHost = host;
+    }
     @Override
     public void messageReceived(IoSession session, Object message) throws Exception {
         super.messageReceived(session, message);

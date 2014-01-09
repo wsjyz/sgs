@@ -38,12 +38,15 @@ public class HallServiceImpl implements HallService {
 
     @Override
     public void increaseHallUserCount(String host, int port,boolean isIncrease) {
-        int step = 1;
-        if(!isIncrease){
-            step = -1;
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(host) && port != 0){
+            int step = 1;
+            if(!isIncrease){
+                step = -1;
+            }
+            double hallUserCount = redisTemplate.boundZSetOps("hallSet").incrementScore(host+":"+port,step);
+            LOGGER.info("当前人数为"+hallUserCount);
         }
-        double hallUserCount = redisTemplate.boundZSetOps("hallSet").incrementScore(host+":"+port,step);
-        LOGGER.info("当前人数为"+hallUserCount);
+
     }
     public void init(){
         Properties properties = StringUtils.readProperties("mina.properties");
