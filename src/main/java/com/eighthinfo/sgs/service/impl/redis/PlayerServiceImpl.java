@@ -75,8 +75,11 @@ public class PlayerServiceImpl extends BaseService implements PlayerService {
                     ZSetOperations.TypedTuple<String> typedTuple = itor.next();
                     String roomId = typedTuple.getValue();
                     roomPlayer.setRoomId(roomId);
-                    AtomicInteger seatNo = new AtomicInteger(typedTuple.getScore().intValue());
-                    roomPlayer.setSeatNo(seatNo.incrementAndGet());
+                    //设置座位号,队列中最后一个人的index+1=size
+                    Long lsize = redisTemplate.boundListOps(roomPlayer.getRoomId()).size();
+                    //String index = redisTemplate.boundListOps(roomPlayer.getRoomId()).index(lsize);
+                    //AtomicInteger seatNo = new AtomicInteger(Integer.parseInt(index));
+                    roomPlayer.setSeatNo(lsize.intValue());
                     redisTemplate.boundZSetOps(awardId).incrementScore(roomPlayer.getRoomId(), 1);
                     hasRoom.set(true);
 
@@ -104,11 +107,11 @@ public class PlayerServiceImpl extends BaseService implements PlayerService {
         commonMessage.setReceiver(roomPlayer.getPlayerId());
         commonMessage.setCallMethod(Constants.ON_ENTER_ROOM);
         commonMessage.setCallMethodParameters(playerList);
-
+        //System.out.println("向自己发送:"+playerList);
         //广播当前玩家信息
         broadcastToOther(roomPlayer.getPlayerId(), playerList,
                 Constants.ON_OTHER_USER_COME_IN, roomPlayer);
-
+        //System.out.println("向其他人发送:"+roomPlayer);
         return commonMessage;
     }
 
@@ -126,9 +129,22 @@ public class PlayerServiceImpl extends BaseService implements PlayerService {
         List<String> stringList = redisTemplate.boundListOps(roomId).range(0,5);
 
         List<RoomPlayer> playerList =  parseStringToObject(stringList);
-
+        //告诉其他人已经准备好了
         broadcastToOther(playerId,playerList,Constants.ON_PLAYER_READY,"{\"playerId\":\""+playerId+"\"}");
 
+        //判断是否这个房间内所有人都准备好了，如果都准备好了就开始答题
+        String readyStr = redisTemplate.boundValueOps(roomId+"_READINFO").get();
+        int readyCount = 0;
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(readyStr)){
+            readyCount = Integer.parseInt(readyStr);
+        }
+        AtomicInteger readyPlayerCount = new AtomicInteger(readyCount);
+        Integer result = readyPlayerCount.incrementAndGet();
+        if(readyCount >= 6){
+            broadcastToOther(null,playerList,Constants.ON_PK_READY,"{\"ready\":\""+true+"\"}");
+        }else{
+            redisTemplate.boundValueOps(roomId+"_READINFO").set(result.toString());
+        }
         return null;
     }
 
@@ -156,19 +172,19 @@ public class PlayerServiceImpl extends BaseService implements PlayerService {
         //减少此房间的人数
         int roomPlayerCounts = 0;
         if(org.apache.commons.lang3.StringUtils.isNotBlank(roomPlayer.getAwardId())){
-
             roomPlayerCounts = redisTemplate.boundZSetOps(roomPlayer.getAwardId())
                     .incrementScore(roomPlayer.getRoomId(),-1).intValue();
 
-            if(roomPlayerCounts <= 0){  //所有人都退出了删除排名中的房间
+            if(roomPlayerCounts < 0){  //所有人都退出了删除排名中的房间
                 redisTemplate.boundZSetOps(roomPlayer.getAwardId()).remove(roomPlayer.getRoomId());
+                redisTemplate.delete(roomId+"_READINFO");
             }else{
                 List<String> stringList = redisTemplate.boundListOps(roomPlayer.getRoomId()).range(0,5);
 
                 List<RoomPlayer> playerList =  parseStringToObject(stringList);
 
                 broadcastToOther(roomPlayer.getPlayerId(),playerList,
-                        Constants.ON_OTHER_USER_LEFT,roomPlayer);
+                        Constants.ON_OTHER_USER_LEFT,playerList); //广播所有，让客户端感知座位的变化
             }
         }
 
